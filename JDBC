@@ -1,0 +1,73 @@
+CREATE TABLE students (
+    id INT PRIMARY KEY,
+    name VARCHAR(100),
+    department VARCHAR(100),
+    cgpa FLOAT
+);
+
+import java.sql.*;
+import java.util.Scanner;
+
+public class StudentRecordApp {
+    static final String URL = "jdbc:mysql://localhost:3306/your_database";
+    static final String USER = "your_username";
+    static final String PASS = "your_password";
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASS)) {
+            while (true) {
+                System.out.println("\n1. Add Student");
+                System.out.println("2. View Student by ID");
+                System.out.println("3. Exit");
+                System.out.print("Choose option: ");
+                int choice = sc.nextInt();
+
+                if (choice == 1) {
+                    System.out.print("Enter ID: ");
+                    int id = sc.nextInt();
+                    sc.nextLine();
+                    System.out.print("Enter Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("Enter Department: ");
+                    String dept = sc.nextLine();
+                    System.out.print("Enter CGPA: ");
+                    float cgpa = sc.nextFloat();
+
+                    String sql = "INSERT INTO students VALUES (?, ?, ?, ?)";
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    pstmt.setInt(1, id);
+                    pstmt.setString(2, name);
+                    pstmt.setString(3, dept);
+                    pstmt.setFloat(4, cgpa);
+                    pstmt.executeUpdate();
+                    System.out.println("Student added successfully.");
+
+                } else if (choice == 2) {
+                    System.out.print("Enter ID: ");
+                    int id = sc.nextInt();
+                    String sql = "SELECT * FROM students WHERE id = ?";
+                    PreparedStatement pstmt = conn.prepareStatement(sql);
+                    pstmt.setInt(1, id);
+                    ResultSet rs = pstmt.executeQuery();
+
+                    if (rs.next()) {
+                        System.out.println("ID: " + rs.getInt("id"));
+                        System.out.println("Name: " + rs.getString("name"));
+                        System.out.println("Department: " + rs.getString("department"));
+                        System.out.println("CGPA: " + rs.getFloat("cgpa"));
+                    } else {
+                        System.out.println("Student not found.");
+                    }
+
+                } else if (choice == 3) {
+                    break;
+                } else {
+                    System.out.println("Invalid choice.");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
