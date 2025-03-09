@@ -1,0 +1,47 @@
+package file_transfer;
+
+import java.io.*;
+import java.net.*;
+
+public class FileReceiverServer {
+    public static void main(String[] args) {
+        int port = 5000;
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Server started. Waiting for a client...");
+
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected.");
+
+            DataInputStream dis = new DataInputStream(socket.getInputStream());
+            FileOutputStream fos = new FileOutputStream("received_file.txt");
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = dis.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+                System.out.println("Received " + bytesRead + " bytes");
+            }
+
+            fos.close();
+            dis.close();
+            socket.close();
+
+            System.out.println("File received and saved as 'received_file.txt'.");
+
+            // Print the received file contents
+            System.out.println("----- Received File Content -----");
+            BufferedReader reader = new BufferedReader(new FileReader("received_file.txt"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            reader.close();
+            System.out.println("----- End of File -----");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
