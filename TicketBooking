@@ -1,0 +1,106 @@
+package file_transfer;
+
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.util.List;
+
+public class TicketBookingSystem extends Frame implements ActionListener {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// GUI Components
+    Choice movieChoice, timeChoice;
+    Panel seatPanel;
+    Button bookButton;
+    Label statusLabel;
+
+    // Seat checkboxes
+    Checkbox[] seats = new Checkbox[20];
+    Set<Integer> bookedSeats = new HashSet<>();
+
+    public TicketBookingSystem() {
+        // Frame settings
+        setTitle("Multiplex Ticket Booking System");
+        setSize(600, 500);
+        setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
+
+        // Top Panel for movie & time selection
+        Panel topPanel = new Panel(new GridLayout(2, 2, 10, 10));
+        topPanel.add(new Label("Select Movie:"));
+        movieChoice = new Choice();
+        movieChoice.add("Avengers");
+        movieChoice.add("Inception");
+        movieChoice.add("Interstellar");
+        movieChoice.add("Jawan");
+        topPanel.add(movieChoice);
+
+        topPanel.add(new Label("Select Showtime:"));
+        timeChoice = new Choice();
+        timeChoice.add("10:00 AM");
+        timeChoice.add("1:00 PM");
+        timeChoice.add("4:00 PM");
+        timeChoice.add("7:00 PM");
+        topPanel.add(timeChoice);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // Seat Panel
+        seatPanel = new Panel(new GridLayout(4, 5, 10, 10));
+        for (int i = 0; i < 20; i++) {
+            seats[i] = new Checkbox("Seat " + (i + 1));
+            seatPanel.add(seats[i]);
+        }
+        add(seatPanel, BorderLayout.CENTER);
+
+        // Bottom Panel for booking button and status
+        Panel bottomPanel = new Panel(new FlowLayout());
+        bookButton = new Button("Book");
+        bookButton.addActionListener(this);
+        bottomPanel.add(bookButton);
+
+        statusLabel = new Label("Select seats and click 'Book'");
+        bottomPanel.add(statusLabel);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Close window
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        setVisible(true);
+    }
+
+    // Event handler
+    public void actionPerformed(ActionEvent e) {
+        String movie = movieChoice.getSelectedItem();
+        String time = timeChoice.getSelectedItem();
+        List<Integer> selectedSeats = new ArrayList<>();
+
+        for (int i = 0; i < seats.length; i++) {
+            if (seats[i].getState() && !bookedSeats.contains(i)) {
+                selectedSeats.add(i);
+            }
+        }
+
+        if (selectedSeats.isEmpty()) {
+            statusLabel.setText("No seats selected or already booked.");
+        } else {
+            for (int seatIndex : selectedSeats) {
+                bookedSeats.add(seatIndex);
+                seats[seatIndex].setEnabled(false); // Disable booked seats
+                seats[seatIndex].setState(false);   // Uncheck after booking
+            }
+            statusLabel.setText("Booked: " + selectedSeats.size() + " seat(s) for " + movie + " at " + time);
+        }
+    }
+
+    public static void main(String[] args) {
+        new TicketBookingSystem();
+    }
+}
