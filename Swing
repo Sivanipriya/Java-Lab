@@ -1,0 +1,100 @@
+package week9;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class Swing extends JFrame implements ActionListener {
+    private static final long serialVersionUID = 1L;
+    private JComboBox<String> movieChoice, timeChoice;
+    private JPanel seatPanel;
+    private JButton bookButton;
+    private JLabel statusLabel;
+    private JCheckBox[] seats = new JCheckBox[20];
+    private Set<Integer> bookedSeats = new HashSet<>();
+
+    public Swing() {
+        setTitle("Multiplex Ticket Booking System");
+        setSize(600, 500);
+        setLayout(new BorderLayout());
+        setLocationRelativeTo(null);
+
+        // Top Panel for Movie and Showtime Selection
+        JPanel topPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        topPanel.add(new JLabel("Select Movie:"));
+        movieChoice = new JComboBox<>(new String[]{"Avengers", "Dragon", "Love Today"});
+        topPanel.add(movieChoice);
+
+        topPanel.add(new JLabel("Select Showtime:"));
+        timeChoice = new JComboBox<>(new String[]{"10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM"});
+        topPanel.add(timeChoice);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        // Seat Selection Panel
+        seatPanel = new JPanel(new GridLayout(4, 5, 10, 10));
+        for (int i = 0; i < 20; i++) {
+            seats[i] = new JCheckBox("Seat " + (i + 1));
+            seatPanel.add(seats[i]);
+        }
+        add(seatPanel, BorderLayout.CENTER);
+
+        // Bottom Panel for Booking Button and Status Label
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+        bookButton = new JButton("Book");
+        bookButton.addActionListener(this);
+        bottomPanel.add(bookButton);
+
+        statusLabel = new JLabel("Select seats and click book");
+        bottomPanel.add(statusLabel);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Window Listener to close the application
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String movie = (String) movieChoice.getSelectedItem();
+        String time = (String) timeChoice.getSelectedItem();
+        List<Integer> selectedSeats = new ArrayList<>();
+
+        for (int i = 0; i < seats.length; i++) {
+            if (seats[i].isSelected() && !bookedSeats.contains(i)) {
+                selectedSeats.add(i);
+            }
+        }
+
+        if (selectedSeats.isEmpty()) {
+            statusLabel.setText("No seats selected or already booked");
+        } else {
+            for (int seatIndex : selectedSeats) {
+                bookedSeats.add(seatIndex);
+                seats[seatIndex].setEnabled(false);
+                seats[seatIndex].setSelected(false);
+            }
+            statusLabel.setText("Booked " + selectedSeats.size() + " seat(s) for " + movie + " at " + time);
+        }
+    }
+
+    public static void main(String[] args) {
+        // Run the GUI on the Event Dispatch Thread
+         new Swing();
+    }
+}
